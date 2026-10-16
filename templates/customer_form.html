@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Edit customer' if cid else 'Add customer' }} - Calculus{% endblock %}
+{% block content %}
+<main class="page">
+  <p><a href="{{ url_for('customers') }}">Back to customers</a></p>
+  <h1>{{ 'Edit customer' if cid else 'Add customer' }}</h1>
+  {% include "_flash.html" %}
+  <form class="panel" method="post"
+        action="{{ url_for('customer_edit', cid=cid) if cid else url_for('customer_edit') }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <label for="name">Customer name</label>
+    <input id="name" name="name" type="text" value="{{ v.name }}" required>
+
+    <div class="grid2e">
+      <div>
+        <label for="gstin">GSTIN (blank if unregistered)</label>
+        <input id="gstin" name="gstin" type="text" maxlength="15" value="{{ v.gstin }}">
+      </div>
+      <div>
+        <label for="state">State</label>
+        <select id="state" name="state" required>
+          {% for code, sname in states.items() %}
+            <option value="{{ code }}" {% if code == v.state %}selected{% endif %}>{{ code }} - {{ sname }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+
+    <label for="address">Address</label>
+    <textarea id="address" name="address" rows="3">{{ v.address }}</textarea>
+
+    <div class="grid2e">
+      <div>
+        <label for="phone">Phone</label>
+        <input id="phone" name="phone" type="text" value="{{ v.phone }}">
+      </div>
+      <div>
+        <label for="email">Email</label>
+        <input id="email" name="email" type="text" value="{{ v.email }}">
+      </div>
+    </div>
+    <button class="btn" type="submit">Save customer</button>
+  </form>
+</main>
+
+<script>
+(function () {
+  var gstin = document.getElementById('gstin');
+  var state = document.getElementById('state');
+  gstin.addEventListener('input', function () {
+    var code = gstin.value.trim().slice(0, 2);
+    if (code.length === 2 && state.querySelector('option[value="' + code + '"]')) state.value = code;
+  });
+})();
+</script>
+{% endblock %}

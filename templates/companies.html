@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}All companies - Calculus{% endblock %}
+{% block content %}
+<main class="page wide">
+  <p><a href="{{ url_for('dashboard') }}">Back to dashboard</a></p>
+  <h1>All companies</h1>
+  {% include "_adminnav.html" %}
+  {% include "_flash.html" %}
+  <p class="muted">Each company has its own GSTIN, customers, invoices and users. People only ever see their own company's data.</p>
+
+  <div class="table-wrap">
+  <table class="data">
+    <thead><tr><th>Company</th><th>GSTIN</th><th>State</th><th class="num">Users</th><th class="num">Invoices</th><th>Status</th><th></th></tr></thead>
+    <tbody>
+    {% for c in rows %}
+      <tr>
+        <td>{{ c.name or 'Not set up yet' }}</td>
+        <td>{{ c.gstin or '-' }}</td>
+        <td>{{ states.get(c.state, c.state) }}</td>
+        <td class="num">{{ c.n_users }}</td>
+        <td class="num">{{ c.n_invoices }}</td>
+        <td>{% if c.active %}<span class="badge badge-ok">Active</span>{% else %}<span class="badge">Disabled</span>{% endif %}</td>
+        <td class="num">
+          {% if c.id != user.company_id %}
+          <form method="post" action="{{ url_for('admin_company_toggle', cid=c.id) }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            <button class="btn btn-quiet btn-small" type="submit">{{ 'Disable' if c.active else 'Enable' }}</button>
+          </form>
+          {% else %}Your company{% endif %}
+        </td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+
+  <h2>Add a company</h2>
+  <form class="panel" method="post" action="{{ url_for('admin_company_create') }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <div class="grid3">
+      <div><label for="c-name">Company name</label><input id="c-name" name="name" type="text" required></div>
+      <div><label for="c-gstin">Company GSTIN</label><input id="c-gstin" name="gstin" type="text" maxlength="15" required></div>
+      <div><label for="c-state">State</label>
+        <select id="c-state" name="state" required>
+          {% for code, sname in states.items() %}<option value="{{ code }}">{{ code }} - {{ sname }}</option>{% endfor %}
+        </select></div>
+    </div>
+    <label for="c-address">Address</label>
+    <textarea id="c-address" name="address" rows="2"></textarea>
+    <fieldset>
+      <legend>First login for this company (gets every area, including Admin)</legend>
+      <div class="grid3">
+        <div><label for="a-user">Username</label><input id="a-user" name="admin_username" type="text" required></div>
+        <div><label for="a-name">Full name</label><input id="a-name" name="admin_name" type="text" required></div>
+        <div><label for="a-pass">Password (8+ characters)</label><input id="a-pass" name="admin_password" type="password" minlength="8" required></div>
+      </div>
+    </fieldset>
+    <button class="btn" type="submit">Add company</button>
+  </form>
+</main>
+{% endblock %}

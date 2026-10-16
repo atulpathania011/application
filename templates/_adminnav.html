@@ -1,0 +1,5 @@
+<nav class="subnav" aria-label="Admin sections">
+  <a href="{{ url_for('admin_company') }}" {% if request.endpoint == 'admin_company' %}aria-current="page"{% endif %}>Company details</a>
+  <a href="{{ url_for('admin') }}" {% if request.endpoint == 'admin' %}aria-current="page"{% endif %}>Users and access</a>
+  {% if user.is_super %}<a href="{{ url_for('admin_companies') }}" {% if request.endpoint == 'admin_companies' %}aria-current="page"{% endif %}>All companies</a>{% endif %}
+</nav>

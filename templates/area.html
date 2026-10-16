@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}{{ area.title }} - Calculus{% endblock %}
+{% block content %}
+<main class="page">
+  <p><a href="{{ url_for('dashboard') }}">Back to dashboard</a></p>
+  <h1>{{ area.title }}</h1>
+  <p class="muted">{{ area.desc }}</p>
+  <div class="placeholder">
+    <p>This is the <strong>{{ area.title }}</strong> workspace. Build this area's screens here
+    (forms, tables, calculations). Only users granted this area can see this page.</p>
+  </div>
+</main>
+{% endblock %}
