@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}{% if purchase %}Edit {{ purchase.number }}{% else %}New purchase{% endif %} - Calculus{% endblock %}
+{% block content %}
+<main class="page wide">
+  <p><a href="{% if next_url %}{{ next_url }}{% elif purchase %}{% url 'purchases:purchase_detail' purchase.pk %}{% else %}{% url 'purchases:purchase_list' %}{% endif %}">{% if next_url %}Back to the statement{% else %}Back{% endif %}</a></p>
+  <h1>{% if purchase %}Edit purchase {{ purchase.number }}{% else %}New purchase{% endif %}</h1>
+  {% if purchase %}<p class="muted">The entry number stays the same. Saving replaces the supplier details and items with what you see below.</p>{% endif %}
+  {% include "partials/_flash.html" %}
+
+  <form method="post" id="doc-form" data-company-state="{{ company_state }}">
+    {% csrf_token %}
+    <input type="hidden" name="next" value="{{ next_url }}">
+    <div class="panel">
+      <label for="party_pick" style="margin-top:0">Saved supplier</label>
+      <input id="party_pick" type="text" list="parties-dl" autocomplete="off" placeholder="Start typing a supplier name or GSTIN">
+      <datalist id="parties-dl">{% for c in parties %}<option value="{{ c.label }}"></option>{% endfor %}</datalist>
+      <p class="muted small" id="pick-note">{% if parties %}Pick a saved supplier to fill the details below.{% else %}No saved suppliers yet. They are saved when you tick &ldquo;Save this supplier&rdquo; below.{% endif %}</p>
+      <div class="grid3">
+        <div><label for="party_name">Supplier name</label><input id="party_name" name="party_name" type="text" value="{{ v.party_name }}" required></div>
+        <div><label for="party_gstin">Supplier GSTIN (blank if unregistered)</label><input id="party_gstin" name="party_gstin" type="text" maxlength="15" value="{{ v.party_gstin }}"></div>
+        <div><label for="state_code">Supplier's state</label>
+          <select id="state_code" name="state_code" required>
+            {% for code, sname in states.items %}<option value="{{ code }}" {% if code == v.state_code %}selected{% endif %}>{{ code }} - {{ sname }}</option>{% endfor %}
+          </select></div>
+      </div>
+      <div class="grid3">
+        <div><label for="bill_number">Supplier's bill number</label><input id="bill_number" name="bill_number" type="text" maxlength="60" value="{{ v.bill_number }}" required></div>
+        <div><label for="date">Bill date</label><input id="date" name="date" type="date" value="{{ v.date }}" required></div>
+        <div><p class="muted small" id="tax-kind" style="margin-top:2.2rem"></p></div>
+      </div>
+      <label for="party_address">Supplier address</label>
+      <textarea id="party_address" name="party_address" rows="2">{{ v.party_address }}</textarea>
+      {% if not purchase %}<label class="check"><input type="checkbox" id="save_party" name="save_party" value="1" {% if v.save_party %}checked{% endif %}> Save this supplier for next time</label>{% endif %}
+    </div>
+
+    {% include "partials/_line_items.html" %}
+    <div class="actions">
+      <button class="btn" type="submit" name="action" value="save">{% if purchase %}Save changes{% else %}Save purchase{% endif %}</button>
+      <button class="btn btn-quiet" type="submit" name="action" value="save_print">Save and print</button>
+    </div>
+    {% if next_url %}<p class="muted small">After saving you return to the statement. &ldquo;Save and print&rdquo; opens the print window first, then returns to the statement.</p>{% endif %}
+  </form>
+</main>
+{% endblock %}
+{% block scripts %}
+{{ parties|json_script:"parties-data" }}
+<script src="{% static 'js/document_form.js' %}"></script>
+{% endblock %}

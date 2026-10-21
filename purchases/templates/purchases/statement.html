@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% load calculus_tags %}
+{% block title %}Purchase statement - Calculus{% endblock %}
+{% block content %}
+<main class="page wide">
+  <p><a href="{% url 'purchases:purchase_list' %}">Back to purchases</a></p>
+  <div class="head-row">
+    <div><h1>Purchase statement</h1><p class="muted">{{ f.start|date:"d-m-Y" }} to {{ f.end|date:"d-m-Y" }}</p></div>
+    <a class="btn btn-quiet" href="{% url 'purchases:statement_csv' %}?{{ request.GET.urlencode }}">Download CSV</a>
+  </div>
+  {% include "partials/_flash.html" %}
+
+  <form class="filters panel" method="get" action="{% url 'purchases:statement' %}">
+    <div><label for="from">From</label><input id="from" name="from" type="date" value="{{ f.start|date:'Y-m-d' }}"></div>
+    <div><label for="to">To</label><input id="to" name="to" type="date" value="{{ f.end|date:'Y-m-d' }}"></div>
+    <div><label for="status">Status</label>
+      <select id="status" name="status">
+        <option value="all" {% if f.status == 'all' %}selected{% endif %}>All</option>
+        <option value="active" {% if f.status == 'active' %}selected{% endif %}>Active only</option>
+        <option value="cancelled" {% if f.status == 'cancelled' %}selected{% endif %}>Cancelled only</option>
+      </select></div>
+    <div><label for="q">Search</label><input id="q" name="q" type="text" value="{{ f.q }}" placeholder="Number, bill no, supplier, GSTIN"></div>
+    <button class="btn" type="submit">Show</button>
+  </form>
+
+  {% include "partials/_statement_table.html" with kind="purchases" %}
+</main>
+{% endblock %}

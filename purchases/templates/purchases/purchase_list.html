@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% load calculus_tags %}
+{% block title %}Purchases - Calculus{% endblock %}
+{% block content %}
+<main class="page wide">
+  <p><a href="{% url 'core:dashboard' %}">Back to dashboard</a></p>
+  <div class="head-row">
+    <div><h1>Purchases</h1><p class="muted">The 100 latest purchase bills. Open the Purchase statement from the home page for a full period.</p></div>
+    <div class="actions">
+      <a class="btn btn-quiet" href="{% url 'purchases:supplier_list' %}">Suppliers</a>
+      <a class="btn" href="{% url 'purchases:purchase_create' %}">New purchase</a>
+    </div>
+  </div>
+  {% include "partials/_flash.html" %}
+  {% if not company_ready %}
+  <p class="flash flash-error" role="alert">Your company details are not set yet, so purchases cannot be recorded.
+    {% if 'admin' in me.areas %}<a href="{% url 'directory:company_details' %}">Add company details</a>{% else %}Ask an administrator to add them.{% endif %}</p>
+  {% endif %}
+  <form class="search" method="get" action="{% url 'purchases:purchase_list' %}">
+    <label for="q" class="sr">Search purchases</label>
+    <input id="q" name="q" type="text" value="{{ q }}" placeholder="Search by entry no, bill no, supplier or GSTIN">
+    <button class="btn btn-quiet" type="submit">Search</button>
+  </form>
+  {% if purchases %}
+  <div class="table-wrap">
+  <table class="data">
+    <thead><tr><th>Entry no</th><th>Bill no</th><th>Bill date</th><th>Supplier</th><th>GSTIN</th><th class="num">Taxable</th><th class="num">GST</th><th class="num">Total</th><th>Status</th><th></th></tr></thead>
+    <tbody>
+    {% for p in purchases %}
+      <tr class="{% if p.is_cancelled %}cancelled-row{% endif %}">
+        <td><a href="{% url 'purchases:purchase_detail' p.pk %}">{{ p.number }}</a></td><td>{{ p.bill_number }}</td>
+        <td>{{ p.date|date:"d-m-Y" }}</td><td>{{ p.party_name }}</td><td>{{ p.party_gstin|default:"Unregistered" }}</td>
+        <td class="num">{{ p.taxable|inr }}</td><td class="num">{{ p.gst|inr }}</td><td class="num">{{ p.total|inr }}</td>
+        <td>{% if p.is_cancelled %}<span class="badge">Cancelled</span>{% endif %}</td>
+        <td class="num">{% if not p.is_cancelled %}<a href="{% url 'purchases:purchase_edit' p.pk %}">Edit</a>{% endif %}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+  {% else %}
+  <div class="placeholder">{% if q %}No purchases match &ldquo;{{ q }}&rdquo;.{% else %}No purchases yet. Click <strong>New purchase</strong> to record the first bill.{% endif %}</div>
+  {% endif %}
+</main>
+{% endblock %}

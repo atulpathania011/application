@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% load calculus_tags %}
+{% block title %}Customers - Calculus{% endblock %}
+{% block content %}
+<main class="page wide">
+  <p><a href="{% url 'sales:invoice_list' %}">Back to invoices</a></p>
+  <div class="head-row">
+    <div><h1>Customers</h1><p class="muted">Saved customers are filled into new invoices automatically.</p></div>
+    <a class="btn" href="{% url 'sales:customer_create' %}">Add customer</a>
+  </div>
+  {% include "partials/_flash.html" %}
+  <form class="search" method="get" action="{% url 'sales:customer_list' %}">
+    <label for="q" class="sr">Search customers</label>
+    <input id="q" name="q" type="text" value="{{ q }}" placeholder="Search by name, GSTIN or phone">
+    <button class="btn btn-quiet" type="submit">Search</button>
+  </form>
+  {% if rows %}
+  <div class="table-wrap">
+  <table class="data">
+    <thead><tr><th>Name</th><th>GSTIN</th><th>State</th><th>Phone</th><th>Email</th><th></th></tr></thead>
+    <tbody>
+    {% for c in rows %}
+      <tr>
+        <td><a href="{% url 'sales:customer_edit' c.pk %}">{{ c.name }}</a></td>
+        <td>{{ c.gstin|default:"Unregistered" }}</td><td>{{ c.state|state_name }}</td><td>{{ c.phone }}</td><td>{{ c.email }}</td>
+        <td class="num"><form method="post" action="{% url 'sales:customer_delete' c.pk %}" onsubmit="return confirm('Delete this customer? Existing invoices are not affected.')">
+          {% csrf_token %}<button class="btn btn-quiet btn-small" type="submit">Delete</button></form></td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+  {% else %}
+  <div class="placeholder">{% if q %}No customers match &ldquo;{{ q }}&rdquo;.{% else %}No customers yet. Click <strong>Add customer</strong>, or tick &ldquo;Save this customer&rdquo; when you make an invoice.{% endif %}</div>
+  {% endif %}
+</main>
+{% endblock %}

@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% load calculus_tags %}
+{% block title %}Reports - Calculus{% endblock %}
+{% block content %}
+<main class="page wide">
+  <p><a href="{% url 'core:dashboard' %}">Back to dashboard</a></p>
+  <h1>Sales, purchases and net GST</h1>
+  <p class="muted">{{ f.start|date:"d-m-Y" }} to {{ f.end|date:"d-m-Y" }}. Cancelled documents are not counted.</p>
+  {% include "partials/_flash.html" %}
+
+  <form class="filters panel" method="get" action="{% url 'reports:summary' %}">
+    <div><label for="from">From</label><input id="from" name="from" type="date" value="{{ f.start|date:'Y-m-d' }}"></div>
+    <div><label for="to">To</label><input id="to" name="to" type="date" value="{{ f.end|date:'Y-m-d' }}"></div>
+    <button class="btn" type="submit">Show</button>
+  </form>
+
+  <dl class="sums">
+    <div><dt>Output GST (sales)</dt><dd>{{ totals.s_gst|inr }}</dd></div>
+    <div><dt>Input GST (purchases)</dt><dd>{{ totals.p_gst|inr }}</dd></div>
+    <div><dt>{% if totals.net >= 0 %}Net GST payable{% else %}Net GST credit{% endif %}</dt><dd>{{ totals.net|inr }}</dd></div>
+  </dl>
+  <p class="muted small">A simple estimate: output GST minus input GST. It does not check whether each purchase is eligible for input credit, so use it as a guide, not as your return.</p>
+
+  <div class="actions" style="margin:1rem 0">
+    <a class="btn btn-quiet" href="{% url 'statements:sales' %}?from={{ f.start|date:'Y-m-d' }}&to={{ f.end|date:'Y-m-d' }}">Sales statement</a>
+    <a class="btn btn-quiet" href="{% url 'statements:purchases' %}?from={{ f.start|date:'Y-m-d' }}&to={{ f.end|date:'Y-m-d' }}">Purchase statement</a>
+  </div>
+
+  {% if rows %}
+  <div class="table-wrap">
+  <table class="data">
+    <thead><tr><th>Month</th><th class="num">Sales taxable</th><th class="num">Output GST</th><th class="num">Purchases taxable</th><th class="num">Input GST</th><th class="num">Net GST</th></tr></thead>
+    <tbody>
+    {% for r in rows %}
+      <tr><td>{{ r.month|date:"F Y" }}</td><td class="num">{{ r.s_taxable|inr }}</td><td class="num">{{ r.s_gst|inr }}</td>
+        <td class="num">{{ r.p_taxable|inr }}</td><td class="num">{{ r.p_gst|inr }}</td><td class="num">{{ r.net|inr }}</td></tr>
+    {% endfor %}
+    </tbody>
+    <tfoot><tr><th>Total</th><th class="num">{{ totals.s_taxable|inr }}</th><th class="num">{{ totals.s_gst|inr }}</th>
+      <th class="num">{{ totals.p_taxable|inr }}</th><th class="num">{{ totals.p_gst|inr }}</th><th class="num">{{ totals.net|inr }}</th></tr></tfoot>
+  </table>
+  </div>
+  {% else %}
+  <div class="placeholder">No sales or purchases in this period.</div>
+  {% endif %}
+</main>
+{% endblock %}

@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% load calculus_tags %}
+{% block title %}{{ p.number }} - Calculus{% endblock %}
+{% block content %}
+<main class="page wide">
+  <p class="no-print">{% if next_url %}<a href="{{ next_url }}">Back to the statement</a>{% else %}<a href="{% url 'purchases:purchase_list' %}">Back to purchases</a>{% endif %}</p>
+  <div class="no-print">{% include "partials/_flash.html" %}</div>
+
+  <article class="sheet">
+    {% if p.is_cancelled %}<p class="stamp">Cancelled</p>{% endif %}
+    <header class="sheet-head">
+      <div><h1>Purchase bill</h1>
+        <p>Entry no: <strong>{{ p.number }}</strong><br>Supplier bill no: <strong>{{ p.bill_number }}</strong><br>Bill date: {{ p.date|date:"d-m-Y" }}</p></div>
+      <div class="seller"><strong>{{ buyer.name }}</strong><br>
+        {% if buyer.address %}<span class="pre">{{ buyer.address }}</span><br>{% endif %}GSTIN: {{ buyer.gstin }}</div>
+    </header>
+    <section class="parties">
+      <div><h2>Supplier</h2>
+        <p><strong>{{ p.party_name }}</strong><br>{% if p.party_address %}<span class="pre">{{ p.party_address }}</span><br>{% endif %}GSTIN: {{ p.party_gstin|default:"Unregistered" }}</p></div>
+      <div><h2>Supplier's state</h2>
+        <p>{{ p.state_code }} - {{ p.state_code|state_name }}<br>{% if p.supply_type == 'intra' %}Intra-state (CGST + SGST){% else %}Inter-state (IGST){% endif %}</p></div>
+    </section>
+    <div class="table-wrap">
+    <table class="data">
+      <thead><tr><th>#</th><th>Description</th><th>HSN/SAC</th><th class="num">Qty</th><th class="num">Rate</th><th class="num">Taxable</th><th class="num">GST %</th><th class="num">GST</th></tr></thead>
+      <tbody>
+      {% for it in items %}
+        <tr><td>{{ forloop.counter }}</td><td>{{ it.description }}</td><td>{{ it.hsn }}</td>
+          <td class="num">{{ it.qty|num }}</td><td class="num">{{ it.rate|inr }}</td><td class="num">{{ it.taxable|inr }}</td>
+          <td class="num">{{ it.gst_rate|num }}%</td><td class="num">{{ it.tax|inr }}</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    </div>
+    <dl class="totals">
+      <div><dt>Taxable value</dt><dd>{{ p.taxable|inr }}</dd></div>
+      {% if p.supply_type == 'intra' %}<div><dt>CGST</dt><dd>{{ p.cgst|inr }}</dd></div><div><dt>SGST</dt><dd>{{ p.sgst|inr }}</dd></div>
+      {% else %}<div><dt>IGST</dt><dd>{{ p.igst|inr }}</dd></div>{% endif %}
+      <div class="grand"><dt>Bill total</dt><dd>{{ p.total|inr }}</dd></div>
+    </dl>
+    <p class="muted small no-print">Recorded by {{ creator|default:"unknown" }} on {{ p.created_at|date:"d-m-Y H:i" }}.{% if p.updated_at %} Last changed by {{ editor|default:"unknown" }} on {{ p.updated_at|date:"d-m-Y H:i" }}.{% endif %}</p>
+  </article>
+
+  <div class="actions no-print">
+    <button class="btn" type="button" onclick="window.print()">Print</button>
+    {% if can_edit and not p.is_cancelled %}
+      <a class="btn btn-quiet" href="{% url 'purchases:purchase_edit' p.pk %}{% if next_url %}?next={{ next_url|urlencode }}{% endif %}">Edit purchase</a>
+    {% endif %}
+    {% if next_url %}<a class="btn btn-quiet" href="{{ next_url }}">Back to the statement</a>{% endif %}
+  </div>
+</main>
+{% endblock %}
+{% block scripts %}{% include "partials/_autoprint.html" %}{% endblock %}

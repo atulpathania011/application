@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% load calculus_tags %}
+{% block title %}{{ inv.number }} - Calculus{% endblock %}
+{% block content %}
+<main class="page wide">
+  <p class="no-print">{% if next_url %}<a href="{{ next_url }}">Back to the statement</a>{% else %}<a href="{% url 'sales:invoice_list' %}">Back to invoices</a>{% endif %}</p>
+  <div class="no-print">{% include "partials/_flash.html" %}</div>
+
+  <article class="sheet">
+    {% if inv.is_cancelled %}<p class="stamp">Cancelled</p>{% endif %}
+    <header class="sheet-head">
+      <div><h1>Tax invoice</h1><p>Invoice no: <strong>{{ inv.number }}</strong><br>Date: {{ inv.date|date:"d-m-Y" }}</p></div>
+      <div class="seller">
+        <strong>{{ seller.name }}</strong><br>
+        {% if seller.address %}<span class="pre">{{ seller.address }}</span><br>{% endif %}
+        GSTIN: {{ seller.gstin }}
+        {% if seller.phone %}<br>Phone: {{ seller.phone }}{% endif %}
+        {% if seller.email %}<br>{{ seller.email }}{% endif %}
+      </div>
+    </header>
+    <section class="parties">
+      <div><h2>Bill to</h2>
+        <p><strong>{{ inv.party_name }}</strong><br>{% if inv.party_address %}<span class="pre">{{ inv.party_address }}</span><br>{% endif %}GSTIN: {{ inv.party_gstin|default:"Unregistered" }}</p></div>
+      <div><h2>Place of supply</h2>
+        <p>{{ inv.state_code }} - {{ inv.state_code|state_name }}<br>{% if inv.supply_type == 'intra' %}Intra-state (CGST + SGST){% else %}Inter-state (IGST){% endif %}</p></div>
+    </section>
+    <div class="table-wrap">
+    <table class="data">
+      <thead><tr><th>#</th><th>Description</th><th>HSN/SAC</th><th class="num">Qty</th><th class="num">Rate</th><th class="num">Taxable</th><th class="num">GST %</th><th class="num">GST</th></tr></thead>
+      <tbody>
+      {% for it in items %}
+        <tr><td>{{ forloop.counter }}</td><td>{{ it.description }}</td><td>{{ it.hsn }}</td>
+          <td class="num">{{ it.qty|num }}</td><td class="num">{{ it.rate|inr }}</td><td class="num">{{ it.taxable|inr }}</td>
+          <td class="num">{{ it.gst_rate|num }}%</td><td class="num">{{ it.tax|inr }}</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    </div>
+    <dl class="totals">
+      <div><dt>Taxable value</dt><dd>{{ inv.taxable|inr }}</dd></div>
+      {% if inv.supply_type == 'intra' %}<div><dt>CGST</dt><dd>{{ inv.cgst|inr }}</dd></div><div><dt>SGST</dt><dd>{{ inv.sgst|inr }}</dd></div>
+      {% else %}<div><dt>IGST</dt><dd>{{ inv.igst|inr }}</dd></div>{% endif %}
+      <div class="grand"><dt>Invoice total</dt><dd>{{ inv.total|inr }}</dd></div>
+    </dl>
+    {% if seller.bank %}<section class="bank"><h2>Bank details</h2><p class="pre">{{ seller.bank }}</p></section>{% endif %}
+    <p class="muted small no-print">Created by {{ creator|default:"unknown" }} on {{ inv.created_at|date:"d-m-Y H:i" }}.{% if inv.updated_at %} Last changed by {{ editor|default:"unknown" }} on {{ inv.updated_at|date:"d-m-Y H:i" }}.{% endif %}</p>
+  </article>
+
+  <div class="actions no-print">
+    <button class="btn" type="button" onclick="window.print()">Print invoice</button>
+    {% if can_edit and not inv.is_cancelled %}
+      <a class="btn btn-quiet" href="{% url 'sales:invoice_edit' inv.pk %}{% if next_url %}?next={{ next_url|urlencode }}{% endif %}">Edit invoice</a>
+    {% endif %}
+    {% if next_url %}<a class="btn btn-quiet" href="{{ next_url }}">Back to the statement</a>{% endif %}
+  </div>
+</main>
+{% endblock %}
+{% block scripts %}{% include "partials/_autoprint.html" %}{% endblock %}

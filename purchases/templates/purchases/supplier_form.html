@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}{% if supplier %}Edit supplier{% else %}Add supplier{% endif %} - Calculus{% endblock %}
+{% block content %}
+<main class="page">
+  <p><a href="{% url 'purchases:supplier_list' %}">Back to suppliers</a></p>
+  <h1>{% if supplier %}Edit supplier{% else %}Add supplier{% endif %}</h1>
+  {% include "partials/_flash.html" %}
+  <form class="panel" method="post" action="{% if supplier %}{% url 'purchases:supplier_edit' supplier.pk %}{% else %}{% url 'purchases:supplier_create' %}{% endif %}">
+    {% csrf_token %}
+    <label for="name">Supplier name</label>
+    <input id="name" name="name" type="text" value="{{ v.name }}" required>
+    <div class="grid2e">
+      <div><label for="gstin">GSTIN (blank if unregistered)</label><input id="gstin" name="gstin" type="text" maxlength="15" value="{{ v.gstin }}"></div>
+      <div><label for="state">State</label>
+        <select id="state" name="state" required>{% for code, sname in STATES.items %}<option value="{{ code }}" {% if code == v.state %}selected{% endif %}>{{ code }} - {{ sname }}</option>{% endfor %}</select></div>
+    </div>
+    <label for="address">Address</label>
+    <textarea id="address" name="address" rows="3">{{ v.address }}</textarea>
+    <div class="grid2e">
+      <div><label for="phone">Phone</label><input id="phone" name="phone" type="text" value="{{ v.phone }}"></div>
+      <div><label for="email">Email</label><input id="email" name="email" type="text" value="{{ v.email }}"></div>
+    </div>
+    <button class="btn" type="submit">Save supplier</button>
+  </form>
+</main>
+{% endblock %}
+{% block scripts %}<script src="{% static 'js/party_form.js' %}"></script>{% endblock %}
