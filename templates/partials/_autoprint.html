@@ -1,0 +1,11 @@
+{% if autoprint %}
+{{ next_url|json_script:"next-url" }}
+<script>
+(function () {
+  // "Save and print": open the print window, then go back to the statement the person came from.
+  var next = JSON.parse(document.getElementById('next-url').textContent);
+  if (next) window.addEventListener('afterprint', function () { window.location.href = next; });
+  window.addEventListener('load', function () { setTimeout(function () { window.print(); }, 300); });
+})();
+</script>
+{% endif %}

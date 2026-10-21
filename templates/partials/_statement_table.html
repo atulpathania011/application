@@ -1,0 +1,40 @@
+{% load calculus_tags %}
+{% if rows %}
+<div class="table-wrap">
+<table class="data">
+  <thead><tr>
+    <th>{% if kind == 'purchases' %}Bill date{% else %}Date{% endif %}</th><th>{% if kind == 'purchases' %}Entry no{% else %}Invoice no{% endif %}</th>
+    {% if kind == 'purchases' %}<th>Supplier bill no</th>{% endif %}
+    <th>{% if kind == 'purchases' %}Supplier{% else %}Customer{% endif %}</th><th>GSTIN</th>
+    <th class="num">Taxable</th><th class="num">CGST</th><th class="num">SGST</th><th class="num">IGST</th>
+    <th class="num">Total</th><th></th>
+  </tr></thead>
+  <tbody>
+  {% for r in rows %}
+    <tr class="{% if r.is_cancelled %}cancelled-row{% endif %}">
+      <td>{{ r.date|date:"d-m-Y" }}</td>
+      <td>{% if kind == 'purchases' %}<a href="{% url 'purchases:purchase_detail' r.pk %}?next={{ request.get_full_path|urlencode }}">{{ r.number }}</a>{% else %}<a href="{% url 'sales:invoice_detail' r.pk %}?next={{ request.get_full_path|urlencode }}">{{ r.number }}</a>{% endif %}</td>
+      {% if kind == 'purchases' %}<td>{{ r.bill_number }}</td>{% endif %}
+      <td>{{ r.party_name }}</td>
+      <td>{{ r.party_gstin|default:"Unregistered" }}</td>
+      <td class="num">{{ r.taxable|inr }}</td><td class="num">{{ r.cgst|inr }}</td>
+      <td class="num">{{ r.sgst|inr }}</td><td class="num">{{ r.igst|inr }}</td>
+      <td class="num">{{ r.total|inr }}</td>
+      <td class="num">{% if can_edit and not r.is_cancelled %}<a href="{% if kind == 'purchases' %}{% url 'purchases:purchase_edit' r.pk %}{% else %}{% url 'sales:invoice_edit' r.pk %}{% endif %}?next={{ request.get_full_path|urlencode }}">Edit</a>{% endif %}</td>
+    </tr>
+  {% endfor %}
+  </tbody>
+  <tfoot>
+    <tr>
+      <th colspan="{% if kind == 'purchases' %}5{% else %}4{% endif %}">Total of {{ totals.count }} {% if kind == 'purchases' %}purchase{% else %}invoice{% endif %}{{ totals.count|pluralize }}</th>
+      <th class="num">{{ totals.taxable|inr }}</th><th class="num">{{ totals.cgst|inr }}</th>
+      <th class="num">{{ totals.sgst|inr }}</th><th class="num">{{ totals.igst|inr }}</th>
+      <th class="num">{{ totals.total|inr }}</th><th></th>
+    </tr>
+  </tfoot>
+</table>
+</div>
+{% if totals.cancelled %}<p class="muted small">{{ totals.cancelled }} document{{ totals.cancelled|pluralize }} cancelled in an earlier version {{ totals.cancelled|pluralize:"is,are" }} struck through and not counted in the totals.</p>{% endif %}
+{% else %}
+<div class="placeholder">No documents found for these filters.</div>
+{% endif %}

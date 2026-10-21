@@ -1,0 +1,3 @@
+{% for m in messages %}
+  <p class="flash flash-{% if m.level_tag == "success" %}ok{% elif m.level_tag == "warning" %}warning{% else %}error{% endif %}" role="alert">{{ m }}</p>
+{% endfor %}

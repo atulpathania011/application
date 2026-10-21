@@ -1,0 +1,19 @@
+<div class="table-wrap">
+<table class="data items">
+  <thead><tr>
+    <th>Item description</th><th>HSN/SAC</th><th>Qty</th><th>Rate</th><th>GST</th><th class="num">Amount incl. GST</th><th></th>
+  </tr></thead>
+  <tbody id="items">
+    {% for r in rows %}{% include "partials/_item_row.html" %}{% endfor %}
+  </tbody>
+</table>
+</div>
+<template id="row-tpl">{% include "partials/_item_row.html" with r=blank_row %}</template>
+<button type="button" class="btn btn-quiet" id="add-row">Add item</button>
+
+<dl class="sums" id="preview">
+  <div><dt>Taxable value</dt><dd id="p-taxable">0.00</dd></div>
+  <div><dt id="p-tax-label">GST</dt><dd id="p-tax">0.00</dd></div>
+  <div><dt>Total</dt><dd id="p-total">0.00</dd></div>
+</dl>
+<p class="muted small">This preview is for quick checking. The saved amounts are calculated again on the server.</p>

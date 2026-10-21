@@ -1,0 +1,25 @@
+{% load static %}<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Calculus{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+{% if me %}
+<header class="topbar">
+  <a class="wordmark" href="{% url 'core:dashboard' %}"><span class="integral-sm">&int;</span> Calculus</a>
+  <div class="who">
+    <span class="co">{{ me.company.name|default:"Company not set up" }}</span>
+    <span>{{ me.full_name }}</span>
+    <form method="post" action="{% url 'accounts:logout' %}">{% csrf_token %}
+      <button class="btn btn-quiet" type="submit">Log out</button>
+    </form>
+  </div>
+</header>
+{% endif %}
+{% block content %}{% endblock %}
+{% block scripts %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Purchase statement - Calculus{% endblock %}
+{% block content %}
+<main class="page wide">
+  <p><a href="{% url 'core:dashboard' %}">Back to home</a></p>
+  <div class="head-row">
+    <div><h1>Purchase statement</h1><p class="muted">{{ f.start|date:"d-m-Y" }} to {{ f.end|date:"d-m-Y" }}{% if can_edit %} &middot; use <strong>Edit</strong> on any row to change a purchase.{% endif %}</p></div>
+    <a class="btn btn-quiet" href="{% url 'statements:purchases_csv' %}?{{ request.GET.urlencode }}">Download CSV</a>
+  </div>
+  {% include "partials/_flash.html" %}
+
+  <form class="filters panel" method="get" action="{% url 'statements:purchases' %}">
+    <div><label for="from">From</label><input id="from" name="from" type="date" value="{{ f.start|date:'Y-m-d' }}"></div>
+    <div><label for="to">To</label><input id="to" name="to" type="date" value="{{ f.end|date:'Y-m-d' }}"></div>
+    <div><label for="q">Search</label><input id="q" name="q" type="text" value="{{ f.q }}" placeholder="Entry no, bill no, supplier, GSTIN"></div>
+    <button class="btn" type="submit">Show</button>
+  </form>
+
+  {% include "partials/_statement_table.html" with kind="purchases" %}
+</main>
+{% endblock %}

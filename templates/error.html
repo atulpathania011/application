@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block title %}{{ title }} - Calculus{% endblock %}
+{% block content %}
+<main class="page">
+  <h1>{{ title }}</h1>
+  <p class="muted">{{ text }}</p>
+  <p><a href="{% url 'core:home' %}">Go to dashboard</a></p>
+</main>
+{% endblock %}

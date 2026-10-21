@@ -1,0 +1,11 @@
+<tr>
+  <td><input type="text" name="desc" value="{{ r.desc }}" aria-label="Item description"></td>
+  <td><input type="text" name="hsn" value="{{ r.hsn }}" inputmode="numeric" aria-label="HSN or SAC code"></td>
+  <td><input type="number" name="qty" value="{{ r.qty }}" step="any" min="0" aria-label="Quantity"></td>
+  <td><input type="number" name="rate" value="{{ r.rate }}" step="any" min="0" aria-label="Rate"></td>
+  <td><select name="gst" aria-label="GST rate">
+    {% for g in gst_options %}<option value="{{ g }}" {% if g == r.gst %}selected{% endif %}>{{ g }}%</option>{% endfor %}
+  </select></td>
+  <td class="num line">0.00</td>
+  <td><button type="button" class="btn btn-quiet remove" aria-label="Remove item">Remove</button></td>
+</tr>
