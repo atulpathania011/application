@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Log in - Calculus{% endblock %}
+{% block content %}
+<main class="login">
+  <section class="login-brand" aria-hidden="true">
+    <div class="brand-name serif">Calculus</div>
+    <div class="integral">&int;</div>
+    <p class="brand-line">Invoices, purchases and GST returns, kept in one ledger.</p>
+  </section>
+  <section class="login-form-wrap">
+    <form class="stack" method="post" action="{% url 'accounts:login' %}" autocomplete="on">
+      {% csrf_token %}
+      <h1>Log in</h1>
+      <p class="muted">Only users added by an administrator can sign in.</p>
+      {% include "partials/_flash.html" %}
+      <label for="username">Username</label>
+      <input id="username" name="username" type="text" autocomplete="username" required autofocus>
+      <label for="password">Password</label>
+      <input id="password" name="password" type="password" autocomplete="current-password" required>
+      <button class="btn" type="submit">Log in</button>
+    </form>
+  </section>
+</main>
+{% endblock %}

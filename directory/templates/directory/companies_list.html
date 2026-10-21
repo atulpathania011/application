@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% load calculus_tags %}
+{% block title %}All companies - Calculus{% endblock %}
+{% block content %}
+<main class="page wide">
+  <p><a href="{% url 'core:dashboard' %}">Back to dashboard</a></p>
+  <h1>All companies</h1>
+  {% include "directory/_admin_nav.html" %}
+  {% include "partials/_flash.html" %}
+  <p class="muted">Each company has its own GSTIN, customers, suppliers, invoices, purchases and users. People only ever see their own company's data.</p>
+  <div class="table-wrap">
+  <table class="data">
+    <thead><tr><th>Company</th><th>GSTIN</th><th>State</th><th class="num">Users</th><th class="num">Invoices</th><th class="num">Purchases</th><th>Status</th><th></th></tr></thead>
+    <tbody>
+    {% for r in rows %}
+      <tr>
+        <td>{{ r.company.name|default:"Not set up yet" }}</td>
+        <td>{{ r.company.gstin|default:"-" }}</td>
+        <td>{{ r.company.state|state_name }}</td>
+        <td class="num">{{ r.n_users }}</td><td class="num">{{ r.n_invoices }}</td><td class="num">{{ r.n_purchases }}</td>
+        <td>{% if r.company.is_active %}<span class="badge badge-ok">Active</span>{% else %}<span class="badge">Disabled</span>{% endif %}</td>
+        <td class="num">
+          {% if r.company.id != me.company_id %}
+          <form method="post" action="{% url 'directory:company_toggle' r.company.id %}">{% csrf_token %}
+            <button class="btn btn-quiet btn-small" type="submit">{% if r.company.is_active %}Disable{% else %}Enable{% endif %}</button>
+          </form>
+          {% else %}Your company{% endif %}
+        </td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+
+  <h2>Add a company</h2>
+  <form class="panel" method="post" action="{% url 'directory:company_create' %}">
+    {% csrf_token %}
+    <div class="grid3">
+      <div><label for="c-name">Company name</label><input id="c-name" name="name" type="text" required></div>
+      <div><label for="c-gstin">Company GSTIN</label><input id="c-gstin" name="gstin" type="text" maxlength="15" required></div>
+      <div><label for="c-state">State</label>
+        <select id="c-state" name="state" required>{% for code, sname in STATES.items %}<option value="{{ code }}">{{ code }} - {{ sname }}</option>{% endfor %}</select></div>
+    </div>
+    <label for="c-address">Address</label>
+    <textarea id="c-address" name="address" rows="2"></textarea>
+    <fieldset>
+      <legend>First login for this company (gets every area, including Admin)</legend>
+      <div class="grid3">
+        <div><label for="a-user">Username</label><input id="a-user" name="admin_username" type="text" required></div>
+        <div><label for="a-name">Full name</label><input id="a-name" name="admin_name" type="text" required></div>
+        <div><label for="a-pass">Password (8+ characters)</label><input id="a-pass" name="admin_password" type="password" minlength="8" required></div>
+      </div>
+    </fieldset>
+    <button class="btn" type="submit">Add company</button>
+  </form>
+</main>
+{% endblock %}

@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}Users and access - Calculus{% endblock %}
+{% block content %}
+<main class="page wide">
+  <p><a href="{% url 'core:dashboard' %}">Back to dashboard</a></p>
+  <h1>Users and access</h1>
+  {% include "directory/_admin_nav.html" %}
+  {% include "partials/_flash.html" %}
+
+  <h2>Add a user</h2>
+  <form class="panel" method="post" action="{% url 'directory:user_create' %}">
+    {% csrf_token %}
+    <div class="grid3">
+      <div><label for="n-username">Username</label><input id="n-username" name="username" type="text" required></div>
+      <div><label for="n-name">Full name</label><input id="n-name" name="full_name" type="text" required></div>
+      <div><label for="n-pass">Password (8+ characters)</label><input id="n-pass" name="password" type="password" minlength="8" required></div>
+    </div>
+    <fieldset>
+      <legend>Project areas this user can open</legend>
+      {% for key, a in AREAS.items %}<label class="check"><input type="checkbox" name="areas" value="{{ key }}"> {{ a.title }}</label>{% endfor %}
+    </fieldset>
+    <button class="btn" type="submit">Add user</button>
+  </form>
+
+  <h2>Existing users</h2>
+  {% for r in rows %}
+  <form class="panel" method="post" action="{% url 'directory:user_update' r.id %}">
+    {% csrf_token %}
+    <div class="user-head">
+      <strong>{{ r.full_name }}</strong> <span class="muted">({{ r.username }})</span>
+      {% if r.is_owner %}<span class="badge">Owner</span>{% endif %}
+      {% if not r.active %}<span class="badge">Disabled</span>{% endif %}
+    </div>
+    <fieldset>
+      <legend>Project areas</legend>
+      {% for key, a in AREAS.items %}<label class="check"><input type="checkbox" name="areas" value="{{ key }}" {% if key in r.areas %}checked{% endif %}> {{ a.title }}</label>{% endfor %}
+    </fieldset>
+    <div class="row-controls">
+      <label class="check"><input type="checkbox" name="active" {% if r.active %}checked{% endif %}> Can log in</label>
+      <label for="pw-{{ r.id }}" class="inline">New password</label>
+      <input id="pw-{{ r.id }}" name="new_password" type="password" placeholder="Leave blank to keep">
+      <button class="btn" type="submit">Save changes</button>
+    </div>
+  </form>
+  {% endfor %}
+</main>
+{% endblock %}

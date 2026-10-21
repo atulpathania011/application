@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Home - Calculus{% endblock %}
+{% block content %}
+<main class="page">
+  <h1>Welcome, {{ me.full_name }}</h1>
+  <p class="muted"><strong>{{ me.company.name|default:"Company not set up yet" }}</strong>{% if me.company.gstin %} &middot; GSTIN {{ me.company.gstin }}{% endif %}</p>
+  {% include "partials/_flash.html" %}
+
+  <h2>Statements</h2>
+  <ul class="area-list">
+    {% for s in statements %}
+      {% if s.allowed %}
+      <li class="area-row open">
+        <a href="{{ s.url }}"><span class="area-title">{{ s.title }}</span><span class="area-desc">{{ s.desc }}</span></a>
+        <span class="badge badge-ok">Open</span>
+      </li>
+      {% else %}
+      <li class="area-row locked" aria-disabled="true">
+        <div><span class="area-title">{{ s.title }}</span><span class="area-desc">{{ s.desc }}</span></div>
+        <span class="badge">No access</span>
+      </li>
+      {% endif %}
+    {% endfor %}
+  </ul>
+
+  <h2>Project areas</h2>
+  <p class="muted small">You can open {{ open_count }} of {{ rows|length }} project areas.</p>
+  <ul class="area-list">
+    {% for a in rows %}
+      {% if a.allowed %}
+      <li class="area-row open">
+        <a href="{{ a.url }}"><span class="area-title">{{ a.title }}</span><span class="area-desc">{{ a.desc }}</span></a>
+        <span class="badge badge-ok">Open</span>
+      </li>
+      {% else %}
+      <li class="area-row locked" aria-disabled="true">
+        <div><span class="area-title">{{ a.title }}</span><span class="area-desc">{{ a.desc }}</span></div>
+        <span class="badge">No access</span>
+      </li>
+      {% endif %}
+    {% endfor %}
+  </ul>
+</main>
+{% endblock %}

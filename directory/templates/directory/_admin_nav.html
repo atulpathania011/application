@@ -1,0 +1,5 @@
+<nav class="subnav" aria-label="Admin sections">
+  <a href="{% url 'directory:company_details' %}" {% if request.resolver_match.url_name == 'company_details' %}aria-current="page"{% endif %}>Company details</a>
+  <a href="{% url 'directory:users_list' %}" {% if request.resolver_match.url_name == 'users_list' %}aria-current="page"{% endif %}>Users and access</a>
+  {% if me.is_owner %}<a href="{% url 'directory:companies_list' %}" {% if request.resolver_match.url_name == 'companies_list' %}aria-current="page"{% endif %}>All companies</a>{% endif %}
+</nav>

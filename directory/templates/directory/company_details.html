@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Company details - Calculus{% endblock %}
+{% block content %}
+<main class="page">
+  <p><a href="{% url 'core:dashboard' %}">Back to dashboard</a></p>
+  <h1>Company details</h1>
+  {% include "directory/_admin_nav.html" %}
+  {% include "partials/_flash.html" %}
+  <p class="muted">These details are printed on every invoice and purchase record. Changing them affects new documents only; documents already saved keep the details they were made with.</p>
+  <form class="panel" method="post" action="{% url 'directory:company_details' %}">
+    {% csrf_token %}
+    <label for="name">Company name</label>
+    <input id="name" name="name" type="text" value="{{ v.name }}" required>
+    <div class="grid2e">
+      <div><label for="gstin">Your GSTIN</label><input id="gstin" name="gstin" type="text" maxlength="15" value="{{ v.gstin }}" required></div>
+      <div><label for="state">State</label>
+        <select id="state" name="state" required>
+          {% for code, sname in STATES.items %}<option value="{{ code }}" {% if code == v.state %}selected{% endif %}>{{ code }} - {{ sname }}</option>{% endfor %}
+        </select></div>
+    </div>
+    <label for="address">Address</label>
+    <textarea id="address" name="address" rows="3">{{ v.address }}</textarea>
+    <div class="grid2e">
+      <div><label for="phone">Phone</label><input id="phone" name="phone" type="text" value="{{ v.phone }}"></div>
+      <div><label for="email">Email</label><input id="email" name="email" type="text" value="{{ v.email }}"></div>
+    </div>
+    <label for="bank">Bank details (printed at the bottom of invoices)</label>
+    <textarea id="bank" name="bank" rows="3" placeholder="Bank name, account number, IFSC">{{ v.bank }}</textarea>
+    <button class="btn" type="submit">Save company details</button>
+  </form>
+</main>
+{% endblock %}
